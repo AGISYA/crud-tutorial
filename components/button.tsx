@@ -1,8 +1,12 @@
+"use client";
 import Link from "next/link";
 import React from "react";
 import { IoAddSharp, IoPencil, IoTrashOutline } from "react-icons/io5";
+import { useFormStatus } from "react-dom";
+import { clsx } from "clsx";
+import { deleteContact } from "@/lib/actions";
 
-export const CreatButton = () => {
+export const CreateButton = () => {
   return (
     <Link
       href="/contacts/create"
@@ -14,10 +18,10 @@ export const CreatButton = () => {
   );
 };
 
-export const EditButton = () => {
+export const EditButton = ({ id }: { id: string }) => {
   return (
     <Link
-      href="/contacts/create"
+      href={`/contacts/edit/${id}`}
       className="rounded-sm border p-1 hover:bg-gray-100"
     >
       <IoPencil size={20} />
@@ -25,10 +29,30 @@ export const EditButton = () => {
   );
 };
 
-export const DeletButton = () => {
+export const DeletButton = ({ id }: { id: string }) => {
+  const DeletContactWithId = deleteContact.bind(null, id);
   return (
-    <button className="rounded-sm border p-1 hover:bg-gray-100">
-      <IoTrashOutline size={20} />
+    <form action={DeletContactWithId}>
+      <button className="rounded-sm border p-1 hover:bg-gray-100">
+        <IoTrashOutline size={20} />
+      </button>
+    </form>
+  );
+};
+
+export const SubmitButton = ({ label }: { label: string }) => {
+  const { pending } = useFormStatus();
+  const className = clsx(
+    "text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-sm text-sm w-full px-5 py-3 text-center",
+    { "opacity-50 cursor-progress": pending }
+  );
+  return (
+    <button type="submit" className={className} disabled={pending}>
+      {label === "save" ? (
+        <span>{pending ? "Saving..." : "Save"}</span>
+      ) : (
+        <span>{pending ? "Updating..." : "Update"}</span>
+      )}
     </button>
   );
 };
