@@ -1,23 +1,26 @@
-"use server"
-import { z } from "zod"
-import { prisma } from "@/lib/prisma"
-import { revalidatePath } from "next/cache"
-import { redirect } from "next/navigation"
+"use server";
+import { z } from "zod";
+import { prisma } from "@/lib/prisma";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 const ContactSchema = z.object({
     name: z.string().min(6),
     phone: z.string().min(11),
-})
+});
 
-export const saveContact = async (prevSate: any, formData: FormData) => {
+export const saveContact = async (
+    _prevState: unknown, // tidak digunakan
+    formData: FormData
+) => {
     const validatedFields = ContactSchema.safeParse(
         Object.fromEntries(formData.entries())
     );
 
     if (!validatedFields.success) {
         return {
-            Error: validatedFields.error.flatten().fieldErrors
-        }
+            Error: validatedFields.error.flatten().fieldErrors,
+        };
     }
 
     try {
@@ -25,25 +28,29 @@ export const saveContact = async (prevSate: any, formData: FormData) => {
             data: {
                 name: validatedFields.data.name,
                 phone: validatedFields.data.phone,
-            }
-        })
-
-    } catch (error) {
-        return { message: "Failed to create contact" }
+            },
+        });
+    } catch {
+        return { message: "Failed to create contact" };
     }
+
     revalidatePath("/contacts");
-    redirect("/contacts")
+    redirect("/contacts");
 };
 
-export const updateContact = async (id: string, prevSate: any, formData: FormData) => {
+export const updateContact = async (
+    id: string,
+    _prevState: unknown,
+    formData: FormData
+) => {
     const validatedFields = ContactSchema.safeParse(
         Object.fromEntries(formData.entries())
     );
 
     if (!validatedFields.success) {
         return {
-            Error: validatedFields.error.flatten().fieldErrors
-        }
+            Error: validatedFields.error.flatten().fieldErrors,
+        };
     }
 
     try {
@@ -52,27 +59,24 @@ export const updateContact = async (id: string, prevSate: any, formData: FormDat
                 name: validatedFields.data.name,
                 phone: validatedFields.data.phone,
             },
-            where: { id }
-        })
-
-    } catch (error) {
-        return { message: "Failed to update contact" }
+            where: { id },
+        });
+    } catch {
+        return { message: "Failed to update contact" };
     }
+
     revalidatePath("/contacts");
-    redirect("/contacts")
+    redirect("/contacts");
 };
 
 export const deleteContact = async (id: string) => {
-
-
     try {
         await prisma.contact.delete({
-
-            where: { id }
-        })
-
-    } catch (error) {
-        return { message: "Failed to delete contact" }
+            where: { id },
+        });
+    } catch {
+        return { message: "Failed to delete contact" };
     }
+
     revalidatePath("/contacts");
 };
